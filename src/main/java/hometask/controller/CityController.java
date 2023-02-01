@@ -24,7 +24,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
@@ -94,10 +100,10 @@ public class CityController {
     @PutMapping(path = "city/{id}")
     public ResponseEntity<Void> updateCity(@PathVariable Long id, @Valid @RequestBody UpdateCityRequest updateCityRequest) {
 
-        cityValidator.validateExternalUrl(updateCityRequest.getCityPhoto());
-
         CityEntity cityEntity = citiesRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, format("City with id %d not found", id)));
+
+        cityValidator.validateExternalUrl(updateCityRequest.getCityPhoto());
 
         String newCityName = normalizeCityName(updateCityRequest.getCityName());
         if (existsOtherCitySameName(id, newCityName)) {
@@ -108,9 +114,19 @@ public class CityController {
         cityEntity.setPhoto(updateCityRequest.getCityPhoto().trim());
         citiesRepository.save(cityEntity);
 
+        // Returning HTTP status 204 - means operation was successful, response body is empty (minimising HTTP traffic)
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    /**
+     * City names should be normalized in some way so that we may handle different variations of naming
+     * (e.g. "St. Tropez" and "Saint Tropez" are same city).
+     * For this demo simplified normalization is implemented: just removing extra spaces. For production probably
+     * the most reliable solution would be using 3rd party commercial services for address validation/normalization.
+     *
+     * @param cityName "raw" value of the city name
+     * @return the name without extra spaces
+     */
     private String normalizeCityName(String cityName){
         return  cityName == null ? null : StringUtils.normalizeSpace(cityName);
     }

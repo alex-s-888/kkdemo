@@ -28,6 +28,13 @@ public class CityValidator {
         }
     }
 
+    /**
+     * Verifies that provided url is not malicious.
+     * For this demo simplified implementation is done: checking against set of trusted sites.
+     *
+     * @param url external URL
+     * @throws UntrustedUrlException if url may be malicious
+     */
     public void validateExternalUrl(String url) {
         if(!isTrustedSource(url)){
             throw new UntrustedUrlException("Untrusted external url", "Potentially malicious url parameter");

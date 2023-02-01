@@ -7,6 +7,10 @@ import org.springframework.data.domain.Page;
 
 import java.util.stream.Collectors;
 
+/**
+ * Utility to do mappings between Entities and DTO items.
+ * Trivial for this demo, for more complex cases would suggest using library like MapStruct.
+ */
 public class CityMapper {
 
     public static City mapFromEntity(CityEntity entity) {
